@@ -17,13 +17,16 @@
           
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
+                <li id="dashboardLI" class="nav-item">
                   <a class="nav-link" href="/dashboard">Home</span></a>
                 </li>
-                <li class="nav-item active">
+                <li id="adminLI" class="nav-item">
+                    <a class="nav-link" href="/admin">Admin Console </a>
+                </li>
+                <li id="listviewLI" class="nav-item active">
                   <a class="nav-link" href="">List View <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item">
+                <li id="exportLI" class="nav-item">
                     <a class="nav-link" href="/export">Export Data <span class="sr-only">(current)</span></a>
                 </li>
               </ul>
@@ -53,6 +56,13 @@
         <script type="text/javascript">
             let newTimeArr = <%- JSON.stringify(newTimeArr) %>;
             let newDataArr = <%- JSON.stringify(newDataArr) %>;
+            var isAdmin = <%- JSON.stringify(isAdmin)%>;
+
+            if(!isAdmin){
+                document.getElementById("adminLI").style.display="none";
+                document.getElementById("exportLI").style.display="none";
+            }
+
             for(let i=0;i<newTimeArr.length;i++){
                 //card
                 let card = document.createElement("div");

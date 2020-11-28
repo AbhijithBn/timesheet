@@ -4,16 +4,13 @@ module.exports = mongoose.model('users',
 {
     name: {
         type: String,
-        required: true
     },
     email:{
         type: String, 
         unique: true, 
-        required: true
     },
     password: {
         type: String,
-        required: true
     },
     date: {
         type: Date,
@@ -26,6 +23,18 @@ module.exports = mongoose.model('users',
         timeData : {
             type: Array
         }
-    }]
+    }],
+    isAdmin:{
+        type:Boolean,
+    },
+    emailList:{
+        type:Array,
+    },
+    projectList:{
+        type:Array,
+    },
+    categoryList:{
+        type:Array,
+    }
 })
 

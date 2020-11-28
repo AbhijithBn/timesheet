@@ -4,8 +4,6 @@ router.use(express.static('public'));
 
 //accessing the database
 var User=require('../models/user');
-// var Admin = require('../models/admin');
-
 
 //encryption of registration data
 var bcrypt=require('bcryptjs');
@@ -73,6 +71,20 @@ module.exports =  function(passport){
                     newUser.email = req.body.email;
                     newUser.password=req.body.password;
                     
+                    User.findOne({_id:"5fc204c0ad67a89151ea4447"},(err,admin)=>{
+                        if(admin){
+                            if(admin.emailList.indexOf(req.body.email)!=-1){
+                                newUser.isAdmin = true;
+                            }
+                            else{
+                                newUser.isAdmin = false;
+                            }
+                        }
+                        else{
+                            console.log(err)
+                        }
+                    })
+
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
                             if (err) 

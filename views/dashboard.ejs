@@ -31,13 +31,16 @@
           
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+                <li id="dasboardLi" class="nav-item active">
                   <a class="nav-link" href="/dashboard">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item">
+                <li  id="adminLi" class="nav-item">
+                    <a class="nav-link" href="/admin">Admin Console </a>
+                </li>
+                <li id="listviewLi" class="nav-item">
                   <a class="nav-link" href="/listview">List View</a>
                 </li>
-                <li class="nav-item">
+                <li id="exportLi" class="nav-item">
                     <a class="nav-link" href="/export">Export Data <span class="sr-only">(current)</span></a>
                 </li>
                 
@@ -68,21 +71,14 @@
                             <div class="form-group ml-2">
                                 <div class="projectDropdown">
                                     <select name="project" id="project">
-                                        <option value="0">Hollister</option>
-                                        <option value="1">Camden</option>
-                                        <option value="2">TMN</option>
-                                        <option value="3">Metlife</option>
+                                        
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group ml-2">
                                 <div class="categoryDropdown">
                                     <select name="category" id="category">
-                                        <option value="0">Internal Meeting</option>
-                                        <option value="1">Client Meeting</option>
-                                        <option value="2">R&D</option>
-                                        <option value="3">Content Creation</option>
-                                        <option value="4">Content Review</option>
+                                        
                                     </select>
                                 </div>
                             </div>
@@ -146,6 +142,37 @@
 
         <script>
             var userEmail = '<%= (user.email) %>';
+            var projectList =<%-JSON.stringify(projectList)%>;
+            var categoryList =<%-JSON.stringify(categoryList)%>;
+            var isAdmin = <%- JSON.stringify(isAdmin)%>;
+            
+
+            window.onload = function(){
+                let projectSelect = document.getElementById("project");
+                let categorySelect = document.getElementById("category");
+
+                if(!isAdmin){
+                    document.getElementById("adminLi").style.display="none";
+                    document.getElementById("exportLi").style.display="none";
+                }
+                for(let i=0;i<projectList.length;i++){
+                    let option = document.createElement("option");
+                    option.value = i ;
+                    var text = document.createTextNode(projectList[i]);
+                    option.appendChild(text);
+                    projectSelect.appendChild(option);
+                }
+
+                for(let i=0;i<categoryList.length;i++){
+                    let option = document.createElement("option");
+                    option.value = i ;
+                    var text = document.createTextNode(categoryList[i]);
+                    option.appendChild(text);
+                    categorySelect.appendChild(option);
+                }
+                
+            }
+
             let trArr = [];
             //function to generate Delete button against all table entries
             function deleteIcon(){
@@ -166,6 +193,7 @@
                 trArr.splice(trDel.id,1);
                 console.log("After deletion : ",trArr);
             }   
+            
             //function to generate Edit button against all table entries
             function editIcon(){
                 let td = document.createElement("td");
@@ -177,6 +205,7 @@
                 td.appendChild(edit_btn);
                 return td;
             }
+            
             //this function is called once Add button is called
             function newElement(){
                 // console.log(document.querySelector('[id="inputTime"]').value);

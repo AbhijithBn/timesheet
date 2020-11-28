@@ -3,8 +3,7 @@ var router = express.Router();
 router.use(express.static('public'));
 
 //accessing the database
-var User=require('../models/user');
-// var Admin = require('../models/admin');
+var User = require('../models/user');
 
 //encryption of registration data
 var bcrypt=require('bcryptjs');
@@ -17,6 +16,7 @@ var body_parse=bodyParser.json()
 //passport middleware
 const { ensureAuthenticated,forwardAuthenticated } = require('../config/auth');
 const { json } = require("body-parser");
+const e = require("express");
 
 module.exports =  function(passport){
     router.get('/',forwardAuthenticated,(req,res) =>{
@@ -26,11 +26,76 @@ module.exports =  function(passport){
     // ensureAuthenticated middleware maybe needed incase of issues 
     router.get('/dashboard',ensureAuthenticated ,(req, res) => { 
             // console.log(req.user);
-            res.render('dashboard', {
-                user: req.user
+            User.findOne({_id:"5fc204c0ad67a89151ea4447"},(err,admin)=>{
+                if(admin){
+                    res.render('dashboard', {
+                        user: req.user,
+                        projectList:admin.projectList,
+                        categoryList:admin.categoryList,
+                        isAdmin:req.user.isAdmin
+                    })
+                }
+                else{
+                    console.log(err);
+                }
             })
         }
     );
+
+    router.get('/admin',ensureAuthenticated,(req,res)=>{
+        User.findOne({_id:"5fc204c0ad67a89151ea4447"},(err,admin)=>{
+            if(admin){
+                if(req.user.isAdmin){
+                    res.render('admin',
+                    {
+                        emailList: admin.emailList,
+                        projectList: admin.projectList,
+                        categoryList: admin.categoryList
+                    }
+                    );
+                }
+                else{
+                    res.redirect('/dashboard');
+                }
+            }
+            else{
+                console.log(err)
+            }
+        })
+    })
+
+    router.post('/adminpost',(req,res)=>{
+        let adminList = req.body.adminList;
+        User.find({_id:{ $ne: "5fc204c0ad67a89151ea4447" }},(err,user)=>{
+            // console.log(user,user.length);
+            for(let i=0;i<user.length;i++){
+                // console.log(adminList.indexOf(user[i].email));
+                if(adminList.indexOf(user[i].email)!=-1){
+                    user[i].isAdmin = true;
+                }
+                else{
+                    user[i].isAdmin = false;
+                }
+                user[i].save((err)=>{
+                    if(err){
+                        console.log("Error in saving :",err );
+                    }
+                })
+            }
+            
+        })
+        User.findOne({_id:"5fc204c0ad67a89151ea4447"},(err,user)=>{
+
+            user.emailList = req.body.adminList;
+            user.projectList = req.body.projectList;
+            user.categoryList = req.body.categoryList;
+            user.save((err)=>{
+                if(err){
+                    console.log("Error in saving :",err );
+                }
+            })
+        })
+    })
 
     router.post('/timeSheetData',(req,res) =>{
         console.log(req.body);
@@ -93,20 +158,25 @@ module.exports =  function(passport){
         res.render('listview',{
             email:req.user.email,
             newTimeArr:newTimeArr,
-            newDataArr:newDataArr
+            newDataArr:newDataArr,
+            isAdmin:req.user.isAdmin
         });
     })
 
     router.get('/export',ensureAuthenticated,(req,res)=>{
         const projection = { name: 1 , timesheetObj:1};
-        let UserTimesheetData;
-        User.find({},projection)
-        .then(value =>{
-            // console.log(value,typeof(value));
-            res.render('export',{data:value});
-        })
-        .catch(err => console.log("Error is :",err))
+        if(req.user.isAdmin){
+            let UserTimesheetData;
+            User.find({_id:{ $ne: "5fc204c0ad67a89151ea4447" }},projection)
+            .then(value =>{
+                // console.log(value,typeof(value));
+                res.render('export',{data:value});
+            })
+            .catch(err => console.log("Error is :",err))
+        }
+        else{
+            res.redirect("/dashboard");
+        }
     })
-
     return router;
 }
