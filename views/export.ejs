@@ -1,0 +1,447 @@
+<html>
+    <head>
+        <title>Dashboard</title>
+        <meta charset="utf-8">
+        <!-- bootstrap CDN -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+        <!-- font awesome CDN-->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    </head>
+    <body style="background-color: #17a2b8;">
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #074650;">
+            <a class="navbar-brand" href="/dashboard">TimeSheet</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/listview">List View </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="">Export Data <span class="sr-only">(current)</span></a>
+                </li>
+              </ul>
+              <form class="form-inline my-2 my-lg-0">
+                <a href="/users/logout" class="btn btn-danger">Logout</a>
+              </form>
+            </div>
+        </nav>
+        <div class="container" > 
+            <div class="d-flex justify-content-center" >
+                
+                <div class="card mt-5 shadow-lg p-4 mb-4 " style="width: 2500px; border-radius: 15px; background-color: rgb(214, 244, 250)">
+                    <div class="card mb-2 p-1">
+                        <div class="query" id="querySection">
+                            <div class="form-inline well">
+                                <div class="form-group" data-toggle="tooltip" data-placement="top" title="Enter the Name of the Employee">
+                                    <input style="width:150px;" type="text" id="nameofEmp" placeholder="Name" class="form-control ml-2">
+                                </div>
+                                <div class="form-group" data-toggle="tooltip" data-placement="top" title="Select the Start Date">
+                                    <input type="date" id="startdate" class="form-control ml-2" placeholder="" >
+                                </div>
+                                <div class="form-group" data-toggle="tooltip" data-placement="top" title="Select the End Date">
+                                    <input type="date" id="enddate" class="form-control ml-2" placeholder="" >
+                                </div>
+                                <div class="form-group"  data-toggle="tooltip" data-placement="top" title="Enter the Name of the Project">
+                                    <input style="width:120px;" type="text" id="projectName" placeholder="Project" class="form-control ml-2">
+                                </div>
+                                <div class="form-group"  data-toggle="tooltip" data-placement="top" title="Enter the type of Activity">
+                                    <input style="width:120px;" type="text" id="categoryName" placeholder="Category" class="form-control ml-2" >
+                                </div>
+                                <div class="form-group" data-toggle="tooltip" data-placement="top" title="Enter time in Minutes.For range, enter time separated by space/comma ">
+                                    <input style="width:120px;"  type="text" id="timespent" placeholder="Time spent" class="form-control ml-2">
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" onclick="searchFunction()" id="search" class="btn btn-info ml-2">Search</button>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" onclick="exportTableToCSV('timeheet.csv')" id="export" class="btn btn-secondary ml-2">Export</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="accordion">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            function createCard(data){
+                //card
+                let card = document.createElement("div");
+                card.className = "card datacard";
+
+                //card Header
+                let cardHeader = document.createElement("div");
+                cardHeader.className = "card-header";
+                cardHeader.id = "heading"+String(data.name);
+
+                //h5
+                let h5 = document.createElement("h5");
+                h5.className = "mb-0";
+
+                //button in header to collapse the card
+                let collapseButton = document.createElement("h5");
+                collapseButton.className = "btn btn-link collapsed";
+                collapseButton.setAttribute("data-toggle","collapse");
+                collapseButton.setAttribute("data-target","#collapse"+String(data.name));
+                collapseButton.setAttribute("aria-expanded","false");
+                collapseButton.setAttribute("aria-controls","collapse"+String(data.name));
+                collapseButton.innerText = "Name : "+ data.name.toUpperCase();
+                
+                //collapseDiv
+                let collapseDiv = document.createElement("div");
+                collapseDiv.id = "collapse"+String(data.name);
+                collapseDiv.className = "collapse";
+                collapseDiv.setAttribute("aria-labelledby","heading"+String(data.name));
+                collapseDiv.setAttribute("data-parent","#accordion");
+
+                //card body
+                let cardBody = document.createElement("div");
+                cardBody.className = "card-body";
+                // cardBody.innerText = "something";
+                let table = createTable(data.timesheetObj,data.name);
+                cardBody.appendChild(table);
+                
+
+                //create the card Body
+                collapseDiv.appendChild(cardBody);
+
+                //create Card header
+                h5.appendChild(collapseButton);
+                cardHeader.appendChild(h5);
+                card.appendChild(cardHeader);
+                card.appendChild(collapseDiv)
+
+                document.getElementById("accordion").appendChild(card);
+            }
+
+            function createTable(array,name){
+                //create table
+                let table = document.createElement("table");
+                table.className = "table table-bordered";
+
+                //create thead
+                let thead = document.createElement("thead");
+
+                //create th
+                for(let k=0;k<5;k++){
+                    let th = document.createElement("th");
+                    th.style = "text-align: center"
+                    th.setAttribute("scope","col");
+                    switch(k) {
+                        case 0:
+                            th.innerText = "Date";
+                            break;
+                        case 1:
+                            th.innerText = "Project";
+                            break;
+                        case 2:
+                            th.innerText = "Category";
+                            break;
+                        case 3:
+                            th.innerText = "Time Spend";
+                            break;
+                        case 4:
+                            th.innerText = "Remarks";
+                            break;
+                        default:
+                            console.log(k);
+                    } 
+                    thead.appendChild(th);
+                }
+
+                table.appendChild(thead);
+
+                //create tbody
+                let tbody =  document.createElement("tbody");
+                tbody.id = "timesheetBody"+name;
+
+                let newTbody = createrows(array,tbody)
+                table.appendChild(newTbody);
+                return table;
+            }
+
+            function createrows(array,tbody){
+                // console.log(array);
+                
+                for(let k=0;k<array.length;k++){
+                    let date =  array[k].dateValue;
+                    // console.log(date);
+                    for(let i=0;i<array[k].timeData.length;i++){
+                        let tr = document.createElement("tr");
+                        let td = document.createElement("td");
+                        let text = document.createTextNode(date);
+                        td.appendChild(text);
+                        tr.appendChild(td);
+                        for(let j=0;j<4;j++){
+                            let td = document.createElement("td");
+                            let text = document.createTextNode(array[k].timeData[i][j]);
+                            td.appendChild(text);
+                            tr.appendChild(td);
+                            tr.className="";
+                            tr.style="";
+                        
+                        }
+                        tbody.appendChild(tr);
+                    }
+                }
+
+                return tbody;
+            }
+
+            var data =<%-JSON.stringify(data)%>;
+            for(let i=0;i<data.length;i++){
+                createCard(data[i])
+            }
+            //initialise all textboxes to empty value once page is refreshed
+            window.addEventListener('load', (event) => {
+                console.log('page is fully loaded');
+                document.getElementById('nameofEmp').value="";
+                document.getElementById('startdate').value="";
+                document.getElementById('enddate').value="";
+                document.getElementById('projectName').value="";
+                document.getElementById('categoryName').value="";
+                document.getElementById('timespent').value="";
+
+            });
+
+            //filtering function
+            function searchFunction(){
+                // console.log("Button clicked");
+                let nameinput = document.getElementById("nameofEmp").value.toUpperCase();
+                let projectinput = document.getElementById("projectName").value.toUpperCase();
+                let categoryinput = document.getElementById("categoryName").value.toUpperCase();
+                let timespentinput = document.getElementById("timespent").value;
+                let cardheader =  document.querySelectorAll('[class="card-header"]');
+
+                let startdate = document.getElementById("startdate").value;
+                let enddate = document.getElementById("enddate").value;
+                
+
+                for (let i = 0; i < cardheader.length; i++) {
+                    let headingID = cardheader[i].id;
+                    if (headingID) {
+                        // console.log(headingID);
+                        let newheadingID = headingID.slice(7,headingID.length+1);
+                        if (headingID.toUpperCase().indexOf(nameinput) > -1) {
+                            document.getElementById(headingID).parentElement.style.display = "";
+                        } else {
+                            document.getElementById(headingID).parentElement.style.display = "none";
+                        }
+                    }
+                }
+
+
+
+                let tr = document.querySelectorAll('[class*="datacard"]:not([style="display: none;"]) tbody tr');
+
+                for (let i = 0; i < tr.length; i++) {
+                    if(projectinput){  //if project query entered
+                        if (tr[i].childNodes[1].innerText.toUpperCase().indexOf(projectinput)> -1) { // project is present
+                            if(tr[i].classList.contains("filterproject")>-1){  //if class present, remove it 
+                                tr[i].classList.remove("filterproject");
+                            }
+                            if(tr[i].classList.length==0){  //if class is empty make it visible
+                                tr[i].style.display = "";
+                            }
+
+                        }
+                        else{  //if project it not present
+                            tr[i].style.display = "none";
+                            tr[i].classList.add("filterproject");
+                            // console.log(tr[i].classList.length);
+                        }
+                    }
+                    if(categoryinput){  //if project query entered
+                        if (tr[i].childNodes[2].innerText.toUpperCase().indexOf(categoryinput)> -1) { // project is present
+                            if(tr[i].classList.contains("filtercategory")>-1){  //if class present, remove it 
+                                tr[i].classList.remove("filtercategory");
+                            }
+                            if(tr[i].classList.length==0){  //if class is empty make it visible
+                                tr[i].style.display = "";
+                            }
+                        }
+                        else{  //if project it not present
+                            tr[i].style.display = "none";
+                            tr[i].classList.add("filtercategory");
+                        }
+                    }
+
+                    if(timespentinput){
+                        let value = timespentinput;
+                        let valuearray;
+                        if(value.indexOf(',')>-1){
+                            valuearray = value.split(',') 
+                        }
+                        else if(value.indexOf(' ')>-1){
+                            valuearray= value.split(' ') ;
+                        }
+                        else{
+                            valuearray = value.split(',') 
+                        }
+                        // valuearray = value.split(',') || value.split(' ') ; 
+                        let rangeStart,rangeEnd;
+                        if(valuearray.length==1){
+                            rangeStart = parseInt(valuearray[0]);
+                            rangeEnd = -1;
+                            if (parseInt(tr[i].childNodes[3].innerText) == rangeStart) { // time is present
+                                if(tr[i].classList.contains("filterTime")>-1){  //if class present, remove it 
+                                    tr[i].classList.remove("filterTime");
+                                }
+                                if(tr[i].classList.length==0){  //if class is empty make it visible
+                                    tr[i].style.display = "";
+                                }
+                            }
+                            else{  //if project it not present
+                                tr[i].style.display = "none";
+                                tr[i].classList.add("filterTime");
+                            }
+                        }
+                        else if(valuearray.length==2){
+                            rangeStart = parseInt(valuearray[0]);
+                            rangeEnd = parseInt(valuearray[1]);
+                            let tableTimeValue = parseInt(tr[i].childNodes[3].innerText);
+                            if ((tableTimeValue >= rangeStart) && (tableTimeValue <= rangeEnd)) { // time is present
+                                if(tr[i].classList.contains("filterTime")>-1){  //if class present, remove it 
+                                    tr[i].classList.remove("filterTime");
+                                }
+                                if(tr[i].classList.length==0){  //if class is empty make it visible
+                                    tr[i].style.display = "";
+                                }
+                            }
+                            else{  //if project it not present
+                                tr[i].style.display = "none";
+                                tr[i].classList.add("filterTime");
+                            }
+                        }
+                        
+                    }
+                    
+                    if(startdate && enddate){
+                        startdate = new Date(startdate);
+                        enddate = new Date(enddate);
+                        trTime = new Date(tr[i].childNodes[0].innerText);
+                        if(startdate>enddate){
+                            alert("Start Date is after End Date");
+                            break;
+                        }
+                        else if(trTime>=startdate && trTime<=enddate){
+                            if(tr[i].classList.contains("filterDate")>-1){  //if class present, remove it 
+                                tr[i].classList.remove("filterDate");
+                            }
+                            if(tr[i].classList.length==0){  //if class is empty make it visible
+                                tr[i].style.display = "";
+                            }
+                        }
+                        else{
+                            tr[i].style.display = "none";
+                            tr[i].classList.add("filterDate");
+                        }
+                    }
+
+                    if(projectinput==""){  // if project query is cleared
+                        if(tr[i].classList.contains("filterproject")>-1){  //if class present, remove it 
+                                tr[i].classList.remove("filterproject");
+                        }
+                        if(tr[i].classList.length==0){  //if class is empty make it visible
+                            tr[i].style.display = "";
+                        }
+                    }
+                    if(categoryinput==""){  //if category query is cleared
+                        if(tr[i].classList.contains("filtercategory")>-1){  //if class present, remove it 
+                            tr[i].classList.remove("filtercategory");
+                        }
+                        if(tr[i].classList.length==0){  //if class is empty make it visible
+                            tr[i].style.display = "";
+                        }
+                    }
+                    if(timespentinput==""){
+                        if(tr[i].classList.contains("filterTime")>-1){  //if class present, remove it 
+                                tr[i].classList.remove("filterTime");
+                        }
+                        if(tr[i].classList.length==0){  //if class is empty make it visible
+                            tr[i].style.display = "";
+                        }
+                    }
+                    if(!(startdate && enddate)){
+                        if(tr[i].classList.contains("filterDate")>-1){  //if class present, remove it 
+                                tr[i].classList.remove("filterDate");
+                        }
+                        if(tr[i].classList.length==0){  //if class is empty make it visible
+                            tr[i].style.display = "";
+                        }
+                    }
+                }
+            }
+            
+            function downloadCSV(csv, filename) {
+                var csvFile;
+                var downloadLink;
+
+                // CSV file
+                csvFile = new Blob([csv], {type: "text/csv"});
+
+                // Download link
+                downloadLink = document.createElement("a");
+
+                // File name
+                downloadLink.download = filename;
+
+                // Create a link to the file
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+
+                // Hide download link
+                downloadLink.style.display = "none";
+
+                // Add the link to DOM
+                document.body.appendChild(downloadLink);
+
+                // Click download link
+                downloadLink.click();
+            }
+
+            function exportTableToCSV(filename){
+                let csv = [];
+                let cards = document.querySelectorAll('[class*="datacard"]:not([style="display: none;"])'); // total number of cards 
+                for(let i=0;i<cards.length;i++){
+                    let row = [];
+                    let username = cards[i].childNodes[0].innerText
+                    row.push(username);
+                    csv.push(row.join(","));
+                    row = []; 
+                    row.push("Date","Project","Category","Time Spent","Remarks");
+                    csv.push(row.join(",")); 
+
+                    let tr = cards[i].querySelectorAll('[class="table table-bordered"] tr:not([style="display: none;"])');
+                    // console.log(tr);
+                    for(let j=0;j<tr.length;j++){
+                        let rownew = [];
+                        let cols = tr[j].querySelectorAll('td');
+                        for(let k=0;k<cols.length;k++){
+                            rownew.push(cols[k].innerText);
+                            // console.log(cols[k].innerText);
+                        }
+                        csv.push(rownew.join(","));        
+                    }
+                }
+                downloadCSV(csv.join("\n"), filename);
+
+            }
+
+        </script>
+        
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
+    
+    </body>
+</html>
