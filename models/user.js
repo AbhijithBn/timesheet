@@ -26,15 +26,6 @@ module.exports = mongoose.model('users',
     }],
     isAdmin:{
         type:Boolean,
-    },
-    emailList:{
-        type:Array,
-    },
-    projectList:{
-        type:Array,
-    },
-    categoryList:{
-        type:Array,
     }
 })
 
