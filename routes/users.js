@@ -4,6 +4,7 @@ router.use(express.static('public'));
 
 //accessing the database
 var User=require('../models/user');
+var Admin = require('../models/admin');
 
 //encryption of registration data
 var bcrypt=require('bcryptjs');
@@ -15,6 +16,7 @@ var body_parse=bodyParser.json()
 
 //passport middleware
 const { ensureAuthenticated,forwardAuthenticated } = require('../config/auth');
+const admin = require("../models/admin");
 
 module.exports =  function(passport){
     router.get('/login',forwardAuthenticated,function(req,res){
@@ -47,7 +49,7 @@ module.exports =  function(passport){
             errors.push({msg: 'Password must be atleast 6 characters'});
         }
         if (errors.length > 0) {
-            res.render('register', {
+            res.render('signup', {
               errors,
               email,
               password,
@@ -55,11 +57,11 @@ module.exports =  function(passport){
         }
         else{
             User.findOne({'email':email}).then(user =>{
-                console.log("User :",user);
+                // console.log("User :",user);
                 if(user){
                     console.log("User already exists");
                     errors.push({ msg: 'Email already exists' });
-                    res.render('register', {
+                    res.render('signup', {
                         errors,
                         email,
                         password,
@@ -70,27 +72,33 @@ module.exports =  function(passport){
                     newUser.name = req.body.name;
                     newUser.email = req.body.email;
                     newUser.password=req.body.password;
+                    newUser.isAdmin = false;
                     
-                    User.findOne({_id:"5fc204c0ad67a89151ea4447"},(err,admin)=>{
-                        if(admin){
-                            if(admin.emailList.indexOf(req.body.email)!=-1){
-                                newUser.isAdmin = true;
-                            }
-                            else{
-                                newUser.isAdmin = false;
-                            }
-                        }
-                        else{
-                            console.log(err)
-                        }
-                    })
+                    // let adminFlag;
+                    // Admin.findOne({_id:"5fe04578c7b3e807b0256337"},(err,admin)=>{
+                    //     if(admin){
+                    //         console.log("email list",admin.emailList," type of email ", typeof(admin.emailList));
+                    //         console.log("Email exists",admin.emailList.indexOf(req.body.email));
+                    //         if(admin.emailList.indexOf(req.body.email)!=-1){
+                    //             adminFlag = true;
+
+                    //             console.log(adminFlag,newUser);
+                    //         }
+                    //         else{
+                    //             adminFlag = false;
+                    //         }
+                    //     }
+                    //     else{
+                    //         console.log(err);
+                    //     }
+                    // })
 
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
                             if (err) 
                                 throw err;
                         newUser.password = hash;
-                        // console.log(hash);
+                        console.log("User is ",newUser);
                         newUser.save().then(user => {
                             req.flash(
                                 'success_msg',

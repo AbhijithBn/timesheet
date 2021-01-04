@@ -76,6 +76,21 @@
 
         <script type="text/javascript">
 
+            //function to remove spaces from username and convert to lowercase for ID and Class attributes for the card and card header
+            function stringManipName(userName){
+                let userNameArray = userName.split("");
+                let newUserName = [];
+                for(let i=0;i<userNameArray.length;i++){
+                    if(userNameArray[i]!= " "){
+                        newUserName.push(userNameArray[i].toLowerCase());
+                    }
+                }
+                newUserName = newUserName.join("");
+                console.log(newUserName);
+                return newUserName;
+            }
+
+            //function to create card dynamically
             function createCard(data){
                 //card
                 let card = document.createElement("div");
@@ -84,7 +99,8 @@
                 //card Header
                 let cardHeader = document.createElement("div");
                 cardHeader.className = "card-header";
-                cardHeader.id = "heading"+String(data.name);
+                let userName = stringManipName(data.name);
+                cardHeader.id = "heading"+userName;
 
                 //h5
                 let h5 = document.createElement("h5");
@@ -94,16 +110,16 @@
                 let collapseButton = document.createElement("h5");
                 collapseButton.className = "btn btn-link collapsed";
                 collapseButton.setAttribute("data-toggle","collapse");
-                collapseButton.setAttribute("data-target","#collapse"+String(data.name));
+                collapseButton.setAttribute("data-target","#collapse"+userName);
                 collapseButton.setAttribute("aria-expanded","false");
-                collapseButton.setAttribute("aria-controls","collapse"+String(data.name));
+                collapseButton.setAttribute("aria-controls","collapse"+userName);
                 collapseButton.innerText = "Name : "+ data.name.toUpperCase();
                 
                 //collapseDiv
                 let collapseDiv = document.createElement("div");
-                collapseDiv.id = "collapse"+String(data.name);
+                collapseDiv.id = "collapse"+userName;
                 collapseDiv.className = "collapse";
-                collapseDiv.setAttribute("aria-labelledby","heading"+String(data.name));
+                collapseDiv.setAttribute("aria-labelledby","heading"+userName);
                 collapseDiv.setAttribute("data-parent","#accordion");
 
                 //card body

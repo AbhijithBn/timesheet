@@ -16,6 +16,9 @@ module.exports = mongoose.model('users',
         type: Date,
         default: Date.now
     },
+    isAdmin:{
+        type:Boolean,
+    },
     timesheetObj: [{
         dateValue : {
             type: String
@@ -24,8 +27,5 @@ module.exports = mongoose.model('users',
             type: Array
         }
     }],
-    isAdmin:{
-        type:Boolean,
-    }
 })
 
