@@ -19,6 +19,12 @@ module.exports = mongoose.model('users',
     isAdmin:{
         type:Boolean,
     },
+    resetPasswordToken:{
+        type:String
+    },
+    resetPasswordExpires:{
+        type:String
+    },
     timesheetObj: [{
         dateValue : {
             type: String
